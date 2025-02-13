@@ -138,6 +138,21 @@ class MiniChess:
             return target
         return 'none'
     """
+    Check if the move is 'queening' to set change from xP to xQ    
+    
+    Args: 
+        - game_state:   dictionary | Dictionary representing the current game state
+        - move          tuple | the move which we check the validity of ((start_row, start_col),(end_row, end_col))
+    Returns:
+        - boolean representing if the move is a 'queening'
+    """
+    def is_queening(self, game_state, move):
+        start, end = move
+        piece = game_state["board"][start[0]][start[1]]
+        if piece[1] == 'p' and (end[0] == 0 or end[0] == 4):
+            return True
+        
+    """
     Modify the board to make a move
 
     Args: 
@@ -153,7 +168,7 @@ class MiniChess:
         end_row, end_col = end
         piece = game_state["board"][start_row][start_col]
         game_state["board"][start_row][start_col] = '.'
-        game_state["board"][end_row][end_col] = piece
+        game_state["board"][end_row][end_col] = piece[0] + 'Q' if (piece[0] == 'w' and end_row == 4) or (piece[0] == 'b' and end_row == 0) and piece[1] == 'p' else piece
         game_state["turn"] = "black" if game_state["turn"] == "white" else "white"
        
         return game_state
@@ -207,8 +222,18 @@ class MiniChess:
             target = self.is_capture(self.current_game_state, move)
             if (target) in ['wK', 'bK']:
                 print(' ** GAME OVER **')
-                break
+                exit(1)
 
+            if target != 'none':
+                print('Capture! ', target, 'is enslaved.')
+
+            if self.is_queening(self.current_game_state, move):
+                start, end = move
+                piece = self.current_game_state["board"][start[0]][start[1]]
+                self.current_game_state["board"][end[0]][end[1]] = piece[0] + 'Q'
+                print('Queening! Pawn promoted to Queen.')
+
+                     
             self.make_move(self.current_game_state, move)
 
 if __name__ == "__main__":
